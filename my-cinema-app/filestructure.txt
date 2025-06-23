@@ -1,3 +1,4 @@
+|-- .env
 |-- .gitignore
 |-- .npmrc
 |-- .prettierignore
@@ -34,9 +35,12 @@
     |-- app.html
     |-- demo.spec.js
     |-- lib
+        |-- api
+            |-- omdb.js
+            |-- tmdb.js
         |-- components
+            |-- MovieCard.svelte
         |-- index.js
-        |-- stores
     |-- routes
         |-- +layout.svelte
         |-- +page.svelte
