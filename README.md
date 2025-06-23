@@ -1,0 +1,1 @@
+Cinema is a responsive and feature-rich entertainment discovery platform that allows users to search movies and TV shows, view detailed information, manage watchlists, explore trending content, and get personalized recommendations — all built with SvelteKit, JavaScript, and plain CSS, integrating TMDB and OMDB APIs.
