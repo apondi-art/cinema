@@ -1,0 +1,55 @@
+|-- .gitignore
+|-- .npmrc
+|-- .prettierignore
+|-- .prettierrc
+|-- .svelte-kit
+    |-- ambient.d.ts
+    |-- generated
+        |-- client
+            |-- app.js
+            |-- matchers.js
+            |-- nodes
+                |-- 0.js
+                |-- 1.js
+                |-- 2.js
+                |-- 3.js
+                |-- 4.js
+                |-- 5.js
+        |-- root.js
+        |-- root.svelte
+        |-- server
+            |-- internal.js
+    |-- non-ambient.d.ts
+    |-- tsconfig.json
+|-- README.md
+|-- e2e
+    |-- demo.test.js
+|-- eslint.config.js
+|-- jsconfig.json
+|-- package-lock.json
+|-- package.json
+|-- playwright.config.js
+|-- src
+    |-- app.css
+    |-- app.html
+    |-- demo.spec.js
+    |-- lib
+        |-- components
+        |-- index.js
+        |-- stores
+    |-- routes
+        |-- +layout.svelte
+        |-- +page.svelte
+        |-- movie
+            |-- [id]
+                |-- +page.svelte
+        |-- page.svelte.test.js
+        |-- search
+            |-- +page.svelte
+        |-- watchlist
+            |-- +page.svelte
+|-- static
+    |-- favicon.png
+|-- svelte.config.js
+|-- vite.config.js
+|-- vitest-setup-client.js

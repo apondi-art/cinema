@@ -1,3 +1,43 @@
-body{
-    background-color: red;
+/* ================ */
+/* Global Variables */
+/* ================ */
+:root {
+    --primary: #0f0f23;
+    --secondary: #1a1a2e;
+    --accent: #ff6b6b;
+    --accent-secondary: #4ecdc4;
+    --text-primary: #ffffff;
+    --text-secondary: #b0b0b0;
+    --bg-gradient: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 50%, #16213e 100%);
+}
+
+/* ========== */
+/* Base Styles */
+/* ========== */
+* {
+    margin: 20;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    background: var(--bg-gradient);
+    color: var(--text-primary);
+    min-height: 100vh;
+    line-height: 1.6;
+}
+
+
+/* ========== */
+/* Typography */
+/* ========== */
+h1, h2, h3, h4 {
+    font-weight: 700;
+    margin-bottom: 1rem;
+}
+
+a {
+    color: inherit;
+    text-decoration: none;
 }
