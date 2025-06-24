@@ -76,7 +76,7 @@
 	<section>
 		<div class="section-header">
 			<h2 class="section-title">🔥 Trending Movies</h2>
-			<a href="/movies/trending" class="view-all">View All</a>
+			<a href="/movie/trending" class="view-all">View All</a>
 		</div>
 		
 		<!-- Loading State for Movies -->

@@ -60,3 +60,15 @@ export async function getPopularTVShows(page = 1) {
     
     return response.json();
 }
+
+
+export async function getTrendingMovies() {
+    const url = `https://api.themoviedb.org/3/trending/movie/day?api_key=${import.meta.env.VITE_TMDB_API_KEY}`;
+    
+    const response = await fetch(url);
+    if (!response.ok) {
+        throw new Error(`Failed to fetch trending movies: ${response.statusText}`);
+    }
+    
+    return await response.json();
+}
