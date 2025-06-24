@@ -24,7 +24,7 @@
 <header class="header">
 	<nav class="nav-container">
 		<!-- Logo that links to the home page -->
-		<a href="/" class="logo">CineDiscover</a>
+		<a href="/" class="logo">Cinema</a>
 		
 		<!-- Navigation links -->
 		<ul class="nav-links">

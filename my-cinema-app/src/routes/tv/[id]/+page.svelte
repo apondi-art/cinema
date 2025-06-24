@@ -4,11 +4,8 @@
 </script>
 
 <svelte:head>
-    <title>{data.media.title} - Movie Details</title>
+    <title>{data.media.name} - TV Show Details</title>
     <meta name="description" content={data.media.overview} />
 </svelte:head>
 
 <MovieDetail {data} />
-
-
-

@@ -1,38 +1,62 @@
-const TMDB_API_KEY = import.meta.env.VITE_TMDB_API_KEY;
+const API_KEY = import.meta.env.VITE_TMDB_API_KEY;
 const BASE_URL = 'https://api.themoviedb.org/3';
 
-export async function fetchTrending(mediaType = 'all', timeWindow = 'day') {
-  try {
+export async function getMovieDetails(movieId) {
     const response = await fetch(
-      `${BASE_URL}/trending/${mediaType}/${timeWindow}?api_key=${TMDB_API_KEY}`
+        `${BASE_URL}/movie/${movieId}?api_key=${API_KEY}&append_to_response=credits`
     );
-    return await handleResponse(response);
-  } catch (error) {
-    handleError('fetchTrending', error);
-  }
+    
+    if (!response.ok) {
+        throw new Error('Failed to fetch movie details');
+    }
+    
+    return response.json();
 }
 
-export async function searchContent(query, page = 1) {
-  try {
+export async function getTVDetails(tvId) {
     const response = await fetch(
-      `${BASE_URL}/search/multi?api_key=${TMDB_API_KEY}&query=${encodeURIComponent(query)}&page=${page}`
+        `${BASE_URL}/tv/${tvId}?api_key=${API_KEY}&append_to_response=credits`
     );
-    return await handleResponse(response);
-  } catch (error) {
-    handleError('searchContent', error);
-  }
+    
+    if (!response.ok) {
+        throw new Error('Failed to fetch TV details');
+    }
+    
+    return response.json();
 }
 
-// Add more TMDB API functions as needed
-
-function handleResponse(response) {
-  if (!response.ok) {
-    throw new Error(`API request failed with status ${response.status}`);
-  }
-  return response.json();
+export async function searchMovies(query, page = 1) {
+    const response = await fetch(
+        `${BASE_URL}/search/multi?api_key=${API_KEY}&query=${encodeURIComponent(query)}&page=${page}`
+    );
+    
+    if (!response.ok) {
+        throw new Error('Failed to search movies');
+    }
+    
+    return response.json();
 }
 
-function handleError(method, error) {
-  console.error(`Error in ${method}:`, error);
-  throw error;
+export async function getPopularMovies(page = 1) {
+    const response = await fetch(
+        `${BASE_URL}/movie/popular?api_key=${API_KEY}&page=${page}`
+    );
+    
+    if (!response.ok) {
+        throw new Error('Failed to fetch popular movies');
+    }
+    
+    return response.json();
+}
+
+export async function getPopularTVShows(page = 1) {
+    const response = await fetch(
+        `${BASE_URL}/tv/popular?api_key=${API_KEY}&page=${page}`
+    );
+    
+    if (!response.ok) {
+        throw new Error('Failed to fetch popular TV shows');
+    }
+    
+    return response.json();
 }

@@ -1,25 +1,27 @@
 const OMDB_API_KEY = import.meta.env.VITE_OMDB_API_KEY;
-const BASE_URL = 'https://www.omdbapi.com';
+const OMDB_BASE_URL = 'https://www.omdbapi.com';
 
 export async function getOmdbDetails(imdbId) {
-  try {
-    const response = await fetch(
-      `${BASE_URL}/?apikey=${OMDB_API_KEY}&i=${imdbId}&plot=full`
-    );
-    return await handleResponse(response);
-  } catch (error) {
-    handleError('getOmdbDetails', error);
-  }
-}
-
-function handleResponse(response) {
-  if (!response.ok) {
-    throw new Error(`OMDB API request failed with status ${response.status}`);
-  }
-  return response.json();
-}
-
-function handleError(method, error) {
-  console.error(`Error in ${method}:`, error);
-  throw error;
+    if (!imdbId) return null;
+    
+    try {
+        const response = await fetch(
+            `${OMDB_BASE_URL}/?apikey=${OMDB_API_KEY}&i=${imdbId}`
+        );
+        
+        if (!response.ok) {
+            return null;
+        }
+        
+        const data = await response.json();
+        
+        if (data.Response === 'False') {
+            return null;
+        }
+        
+        return data;
+    } catch (error) {
+        console.error('Error fetching OMDB data:', error);
+        return null;
+    }
 }
