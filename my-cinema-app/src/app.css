@@ -1,7 +1,7 @@
 /* ================ */
 /* Global Variables */
 /* ================ */
-:root {
+:root.dark {
   /* Color Palette */
   --primary: #0f0f23;
   --secondary: #1a1a2e;
@@ -10,46 +10,67 @@
   --accent-secondary: #4ecdc4;
   --accent-tertiary: #45b7d1;
 
-  
-  
   /* Text Colors */
   --text-primary: #ffffff;
   --text-secondary: #b0b0b0;
   --text-tertiary: rgba(255, 255, 255, 0.7);
-  
+
   /* Backgrounds */
   --bg-gradient: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 50%, var(--tertiary) 100%);
   --bg-card: rgba(255, 255, 255, 0.05);
   --bg-header: rgba(0, 0, 0, 0.8);
-  
+
   /* Borders */
   --border-primary: 1px solid rgba(255, 255, 255, 0.1);
   --border-secondary: 1px solid rgba(255, 255, 255, 0.3);
-  
+
   /* Shadows */
   --shadow-sm: 0 4px 6px rgba(0, 0, 0, 0.1);
   --shadow-md: 0 10px 20px rgba(0, 0, 0, 0.2);
   --shadow-lg: 0 20px 40px rgba(0, 0, 0, 0.3);
-  
-  /* Transitions */
+}
+
+:root.light {
+  --primary: #ffffff;
+  --secondary: #f2f2f2;
+  --tertiary: #e0e0e0;
+  --accent: #ff6b6b;
+  --accent-secondary: #4ecdc4;
+  --accent-tertiary: #45b7d1;
+
+  --text-primary: #1a1a1a;
+  --text-secondary: #555555;
+  --text-tertiary: rgba(0, 0, 0, 0.6);
+
+  --bg-gradient: linear-gradient(135deg, var(--primary), var(--secondary));
+  --bg-card: rgba(0, 0, 0, 0.05);
+  --bg-header: rgba(255, 255, 255, 0.9);
+
+  --border-primary: 1px solid rgba(0, 0, 0, 0.1);
+  --border-secondary: 1px solid rgba(0, 0, 0, 0.3);
+
+  --shadow-sm: 0 4px 6px rgba(0, 0, 0, 0.05);
+  --shadow-md: 0 10px 20px rgba(0, 0, 0, 0.1);
+  --shadow-lg: 0 20px 40px rgba(0, 0, 0, 0.15);
+}
+
+/* Shared Variables */
+:root {
   --transition-fast: all 0.15s ease;
   --transition-normal: all 0.3s ease;
   --transition-slow: all 0.5s ease;
-  
-  /* Spacing */
+
   --space-xs: 0.5rem;
   --space-sm: 1rem;
   --space-md: 1.5rem;
   --space-lg: 2rem;
   --space-xl: 3rem;
-  
-  /* Border Radius */
+
   --radius-sm: 10px;
   --radius-md: 15px;
   --radius-lg: 20px;
   --radius-full: 50px;
-  
-  /* Font Sizes */
+
   --text-xs: 0.8rem;
   --text-sm: 0.9rem;
   --text-base: 1rem;
@@ -83,6 +104,7 @@ body {
   line-height: 1.6;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  transition: background 0.3s ease, color 0.3s ease;
 }
 
 img {
@@ -173,7 +195,7 @@ a {
 
 .nav-links a:hover,
 .nav-links a.active {
-  background: rgba(var(--accent), 0.2);
+  background: rgba(255, 255, 255, 0.1);
   color: var(--accent);
 }
 

@@ -17,6 +17,10 @@
     let popularGenres = [];
     let querySuggestions = []; // New state for real-time query suggestions
     
+    // All content state for when "All" is selected
+    let allContent = [];
+    let isLoadingAll = false;
+    
     // Initialize data
     onMount(async () => {
         mounted = true;
@@ -26,6 +30,10 @@
             await fetchSearchResults();
         } else {
             await fetchSuggestions();
+            // Load all content by default when "All" is selected
+            if (selectedGenre === 'all') {
+                await fetchAllContent();
+            }
         }
     });
     
@@ -44,6 +52,103 @@
             console.error('Error searching:', error);
         } finally {
             isLoading = false;
+        }
+    };
+
+    // Fetch all movies and TV shows when "All" is selected
+    const fetchAllContent = async () => {
+        if (!mounted) return;
+        
+        isLoadingAll = true;
+        try {
+            // Fetch multiple pages of popular movies and TV shows
+            const [
+                popularMoviesRes1,
+                popularMoviesRes2,
+                popularTVRes1,
+                popularTVRes2,
+                topRatedMoviesRes,
+                topRatedTVRes
+            ] = await Promise.all([
+                fetch(`https://api.themoviedb.org/3/movie/popular?api_key=${import.meta.env.VITE_TMDB_API_KEY}&page=1`),
+                fetch(`https://api.themoviedb.org/3/movie/popular?api_key=${import.meta.env.VITE_TMDB_API_KEY}&page=2`),
+                fetch(`https://api.themoviedb.org/3/tv/popular?api_key=${import.meta.env.VITE_TMDB_API_KEY}&page=1`),
+                fetch(`https://api.themoviedb.org/3/tv/popular?api_key=${import.meta.env.VITE_TMDB_API_KEY}&page=2`),
+                fetch(`https://api.themoviedb.org/3/movie/top_rated?api_key=${import.meta.env.VITE_TMDB_API_KEY}&page=1`),
+                fetch(`https://api.themoviedb.org/3/tv/top_rated?api_key=${import.meta.env.VITE_TMDB_API_KEY}&page=1`)
+            ]);
+            
+            const [
+                popularMovies1,
+                popularMovies2,
+                popularTV1,
+                popularTV2,
+                topRatedMovies,
+                topRatedTV
+            ] = await Promise.all([
+                popularMoviesRes1.json(),
+                popularMoviesRes2.json(),
+                popularTVRes1.json(),
+                popularTVRes2.json(),
+                topRatedMoviesRes.json(),
+                topRatedTVRes.json()
+            ]);
+            
+            // Combine all results and add media_type for consistency
+            const movies = [
+                ...popularMovies1.results,
+                ...popularMovies2.results,
+                ...topRatedMovies.results
+            ].map(movie => ({ ...movie, media_type: 'movie' }));
+            
+            const tvShows = [
+                ...popularTV1.results,
+                ...popularTV2.results,
+                ...topRatedTV.results
+            ].map(show => ({ ...show, media_type: 'tv' }));
+            
+            // Combine and shuffle for variety
+            const combined = [...movies, ...tvShows];
+            allContent = combined
+                .sort(() => Math.random() - 0.5) // Shuffle array
+                .slice(0, 60); // Limit to 60 items for performance
+                
+        } catch (error) {
+            console.error('Error fetching all content:', error);
+        } finally {
+            isLoadingAll = false;
+        }
+    };
+
+    // Fetch content by specific genre
+    const fetchContentByGenre = async (genreId) => {
+        if (!mounted || genreId === 'all') return;
+        
+        isLoadingAll = true;
+        try {
+            // Fetch movies and TV shows with the selected genre
+            const [moviesRes, tvRes] = await Promise.all([
+                fetch(`https://api.themoviedb.org/3/discover/movie?api_key=${import.meta.env.VITE_TMDB_API_KEY}&with_genres=${genreId}&page=1`),
+                fetch(`https://api.themoviedb.org/3/discover/tv?api_key=${import.meta.env.VITE_TMDB_API_KEY}&with_genres=${genreId}&page=1`)
+            ]);
+            
+            const [moviesData, tvData] = await Promise.all([
+                moviesRes.json(),
+                tvRes.json()
+            ]);
+            
+            const movies = moviesData.results.map(movie => ({ ...movie, media_type: 'movie' }));
+            const tvShows = tvData.results.map(show => ({ ...show, media_type: 'tv' }));
+            
+            // Combine and shuffle
+            allContent = [...movies, ...tvShows]
+                .sort(() => Math.random() - 0.5)
+                .slice(0, 40);
+                
+        } catch (error) {
+            console.error('Error fetching genre content:', error);
+        } finally {
+            isLoadingAll = false;
         }
     };
 
@@ -95,11 +200,26 @@
         searchResults = [];
         querySuggestions = []; // Clear suggestions too when query is empty
         fetchSuggestions();
+        
+        // Load content based on selected genre when no search query
+        if (selectedGenre === 'all') {
+            fetchAllContent();
+        } else {
+            fetchContentByGenre(selectedGenre);
+        }
     }
     
-    const handleGenreSelect = (genre) => {
+    const handleGenreSelect = async (genre) => {
         selectedGenre = genre;
-        // Add genre filtering logic here if needed
+        
+        // Only fetch content if there's no active search query
+        if (!query) {
+            if (genre === 'all') {
+                await fetchAllContent();
+            } else {
+                await fetchContentByGenre(genre);
+            }
+        }
     };
 </script>
 
@@ -109,7 +229,8 @@
     <SearchBar bind:query />
 
     {#if query && querySuggestions.length > 0}
-        <div class="search-suggestions movie-grid"> {#each querySuggestions as item}
+        <div class="search-suggestions movie-grid"> 
+            {#each querySuggestions as item}
                 <MovieCard movie={{
                     ...item,
                     title: item.title || item.name,
@@ -167,52 +288,85 @@
             <p>No results found for "{query}"</p>
         {/if}
     {:else}
-        <div class="suggestions">
-            <section>
-                <div class="section-header">
-                    <h2 class="section-title">🔥 Trending Movies</h2>
-                    <a href="/movie/trending" class="view-all">View All</a>
+        <!-- Show genre-filtered content when a genre is selected -->
+        {#if selectedGenre !== 'all' || allContent.length > 0}
+            <div class="section-header">
+                <h2 class="section-title">
+                    {#if selectedGenre === 'all'}
+                        🎬 All Movies & TV Shows
+                    {:else}
+                        {popularGenres.find(g => g.id === selectedGenre)?.name || 'Selected Genre'}
+                    {/if}
+                    ({allContent.length} items)
+                </h2>
+            </div>
+
+            {#if isLoadingAll}
+                <div class="loading">
+                    <div class="spinner"></div>
                 </div>
+            {:else if allContent.length > 0}
                 <div class="movie-grid">
-                    {#each trendingMovies as movie}
+                    {#each allContent as item}
                         <MovieCard movie={{
-                            ...movie,
-                            title: movie.title,
-                            year: movie.release_date?.slice(0, 4)
+                            ...item,
+                            title: item.title || item.name,
+                            year: item.release_date || item.first_air_date
                         }} />
                     {/each}
                 </div>
-            </section>
+            {/if}
+        {/if}
 
-            <section>
-                <div class="section-header">
-                    <h2 class="section-title">📺 Trending TV Shows</h2>
-                    <a href="/tv/popular" class="view-all">View All</a>
-                </div>
-                <div class="movie-grid">
-                    {#each trendingTV as show}
-                        <MovieCard movie={{
-                            ...show,
-                            title: show.name,
-                            year: show.first_air_date?.slice(0, 4)
-                        }} />
-                    {/each}
-                </div>
-            </section>
+        <!-- Show suggestions only when no genre is actively selected with content -->
+        {#if selectedGenre === 'all' && allContent.length === 0 && !isLoadingAll}
+            <div class="suggestions">
+                <section>
+                    <div class="section-header">
+                        <h2 class="section-title">🔥 Trending Movies</h2>
+                        <a href="/movie/trending" class="view-all">View All</a>
+                    </div>
+                    <div class="movie-grid">
+                        {#each trendingMovies as movie}
+                            <MovieCard movie={{
+                                ...movie,
+                                title: movie.title,
+                                year: movie.release_date?.slice(0, 4)
+                            }} />
+                        {/each}
+                    </div>
+                </section>
 
-            <section>
-                <div class="section-header">
-                    <h2 class="section-title">🎭 Popular Genres</h2>
-                </div>
-                <div class="genre-suggestions">
-                    {#each popularGenres as genre}
-                        <a href="/genre/{genre.id}" class="genre-card">
-                            {genre.name}
-                        </a>
-                    {/each}
-                </div>
-            </section>
-        </div>
+                <section>
+                    <div class="section-header">
+                        <h2 class="section-title">📺 Trending TV Shows</h2>
+                        <a href="/tv/popular" class="view-all">View All</a>
+                    </div>
+                    <div class="movie-grid">
+                        {#each trendingTV as show}
+                            <MovieCard movie={{
+                                ...show,
+                                title: show.name,
+                                year: show.first_air_date?.slice(0, 4)
+                            }} />
+                        {/each}
+                    </div>
+                </section>
+
+                <section>
+                    <div class="section-header">
+                        <h2 class="section-title">🎭 Popular Genres</h2>
+                    </div>
+                    <div class="genre-suggestions">
+                        {#each popularGenres as genre}
+                            <a href="/genre/{genre.id}" class="genre-card">
+                                {genre.name}
+                            </a>
+                        {/each}
+                    </div>
+                </section>
+            </div>
+        {/if}
     {/if}
 </main>
 
@@ -310,13 +464,6 @@
         position: relative;
         padding: 1rem; /* Add some padding inside the suggestion box */
     }
-
-    /* You may want to adjust the grid template columns for suggestions
-       if they should appear differently from main search results.
-       For now, they will inherit .movie-grid's columns. */
-    /* .search-suggestions.movie-grid {
-        grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); 
-    } */
 
     @keyframes spin {
         0% { transform: rotate(0deg); }
