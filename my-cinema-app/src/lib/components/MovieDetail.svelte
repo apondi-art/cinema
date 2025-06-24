@@ -9,6 +9,62 @@
     $: omdbData = data.omdbData;
     $: isInWatchlist = $watchlist.some(item => item.id === media.id);
     
+    // Watch providers and streaming platforms
+    let showWatchModal = false;
+    
+    // Common streaming platforms with their URLs
+    const streamingPlatforms = [
+        {
+            name: 'YouTube',
+            url: 'https://www.youtube.com/results?search_query=',
+            color: '#FF0000',
+            icon: '📺',
+            description: 'Free with ads'
+        },
+        {
+            name: 'Netflix',
+            url: 'https://www.netflix.com/search?q=',
+            color: '#E50914',
+            icon: '🎬',
+            description: 'Subscription'
+        },
+        {
+            name: 'Amazon Prime',
+            url: 'https://www.amazon.com/s?k=',
+            color: '#00A8E1',
+            icon: '📺',
+            description: 'Rent/Buy/Prime'
+        },
+        {
+            name: 'Disney+',
+            url: 'https://www.disneyplus.com/search?q=',
+            color: '#113CCF',
+            icon: '🏰',
+            description: 'Subscription'
+        },
+        {
+            name: 'Hulu',
+            url: 'https://www.hulu.com/search?q=',
+            color: '#1CE783',
+            icon: '📽️',
+            description: 'Subscription'
+        },
+        {
+            name: 'HBO Max',
+            url: 'https://play.hbomax.com/search?q=',
+            color: '#6441A4',
+            icon: '🎭',
+            description: 'Subscription'
+        },
+        {
+            name: 'Apple TV+',
+            url: 'https://tv.apple.com/search?term=',
+            color: '#000000',
+            icon: '🍎',
+            description: 'Rent/Buy/Sub'
+        }
+    ];
+    
     function toggleWatchlist() {
         if (isInWatchlist) {
             watchlist.remove(media.id);
@@ -33,6 +89,42 @@
                 return item;
             });
         });
+    }
+    
+    function openWatchModal() {
+        showWatchModal = true;
+    }
+    
+    function closeWatchModal() {
+        showWatchModal = false;
+    }
+    
+    function searchOnPlatform(platform) {
+        const query = encodeURIComponent(media.title || media.name);
+        const year = new Date(media.release_date || media.first_air_date).getFullYear();
+        
+        // For YouTube, add additional search terms for better results
+        if (platform.name === 'YouTube') {
+            const mediaType = media.title ? 'movie' : 'tv show';
+            const fullQuery = `${query} ${year} ${mediaType} full`;
+            window.open(platform.url + encodeURIComponent(fullQuery), '_blank');
+        } else {
+            window.open(platform.url + query, '_blank');
+        }
+        
+        closeWatchModal();
+    }
+    
+    // Alternative: Direct watch function for specific streaming service
+    function watchNow() {
+        // You can customize this based on your preferred streaming service
+        // or integrate with a streaming API
+        const title = encodeURIComponent(media.title || media.name);
+        const year = new Date(media.release_date || media.first_air_date).getFullYear();
+        
+        // Example: Search on Google for streaming options
+        const searchQuery = `${title} ${year} watch online streaming`;
+        window.open(`https://www.google.com/search?q=${encodeURIComponent(searchQuery)}`, '_blank');
     }
     
     $: isWatched = $watchlist.find(item => item.id === media.id)?.watched || false;
@@ -90,19 +182,33 @@
         
         <!-- Action Buttons -->
         <div class="action-buttons">
+            <!-- Primary Watch Button -->
+            <button class="btn btn-watch" on:click={openWatchModal}>
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M8 5v14l11-7z"/>
+                </svg>
+                Watch Now
+            </button>
+            
             <button 
                 class="btn {isInWatchlist ? 'btn-secondary' : 'btn-primary'}" 
                 on:click={toggleWatchlist}
             >
-                {isInWatchlist ? '✓ In Watchlist' : '+ Add to Watchlist'}
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
+                </svg>
+                {isInWatchlist ? 'In Watchlist' : 'Add to Watchlist'}
             </button>
             
             {#if isInWatchlist}
                 <button 
-                    class="btn {isWatched ? 'btn-primary' : 'btn-secondary'}" 
+                    class="btn {isWatched ? 'btn-success' : 'btn-secondary'}" 
                     on:click={toggleWatched}
                 >
-                    {isWatched ? '✓ Watched' : 'Mark as Watched'}
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <polyline points="20,6 9,17 4,12"/>
+                    </svg>
+                    {isWatched ? 'Watched' : 'Mark as Watched'}
                 </button>
             {/if}
         </div>
@@ -138,6 +244,51 @@
         {/if}
     </div>
 </div>
+
+<!-- Watch Modal -->
+{#if showWatchModal}
+    <div class="modal-overlay" on:click={closeWatchModal}>
+        <div class="modal-content" on:click|stopPropagation>
+            <div class="modal-header">
+                <h2>Watch "{media.title || media.name}"</h2>
+                <button class="close-btn" on:click={closeWatchModal}>
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <line x1="18" y1="6" x2="6" y2="18"/>
+                        <line x1="6" y1="6" x2="18" y2="18"/>
+                    </svg>
+                </button>
+            </div>
+            
+            <div class="modal-body">
+                <p>Choose a streaming platform to search for this {media.title ? 'movie' : 'TV show'}:</p>
+                
+                <div class="streaming-grid">
+                    {#each streamingPlatforms as platform}
+                        <button 
+                            class="streaming-btn {platform.name === 'YouTube' ? 'youtube-special' : ''}" 
+                            style="--platform-color: {platform.color}"
+                            on:click={() => searchOnPlatform(platform)}
+                        >
+                            <span class="platform-icon">{platform.icon}</span>
+                            <span class="platform-name">{platform.name}</span>
+                            <span class="platform-desc">{platform.description}</span>
+                        </button>
+                    {/each}
+                </div>
+                
+                <div class="modal-footer">
+                    <button class="btn btn-secondary" on:click={watchNow}>
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <circle cx="11" cy="11" r="8"/>
+                            <path d="21 21l-4.35-4.35"/>
+                        </svg>
+                        Search Google
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+{/if}
 
 <style>
     .movie-detail {
@@ -217,6 +368,62 @@
         flex-wrap: wrap;
     }
     
+    .btn {
+        padding: 0.75rem 1.5rem;
+        border: none;
+        border-radius: 8px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        text-decoration: none;
+        font-size: 0.9rem;
+    }
+    
+    .btn-watch {
+        background: linear-gradient(135deg, #ff6b6b, #ee5a24);
+        color: white;
+        font-size: 1rem;
+        padding: 1rem 2rem;
+        box-shadow: 0 4px 15px rgba(255, 107, 107, 0.3);
+    }
+    
+    .btn-watch:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(255, 107, 107, 0.4);
+    }
+    
+    .btn-primary {
+        background: var(--accent);
+        color: white;
+    }
+    
+    .btn-primary:hover {
+        background: var(--accent-secondary);
+        transform: translateY(-1px);
+    }
+    
+    .btn-secondary {
+        background: rgba(255, 255, 255, 0.1);
+        color: var(--text-primary);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+    
+    .btn-secondary:hover {
+        background: rgba(255, 255, 255, 0.2);
+    }
+    
+    .btn-success {
+        background: #2ecc71;
+        color: white;
+    }
+    
+    .btn-success:hover {
+        background: #27ae60;
+    }
+    
     .cast-grid {
         display: grid;
         grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
@@ -259,6 +466,127 @@
         color: var(--text-secondary);
     }
     
+    /* Modal Styles */
+    .modal-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0, 0, 0, 0.8);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 1000;
+        backdrop-filter: blur(5px);
+    }
+    
+    .modal-content {
+        background: var(--bg-secondary, #1a1a1a);
+        border-radius: 15px;
+        max-width: 600px;
+        width: 90%;
+        max-height: 80vh;
+        overflow-y: auto;
+        box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+    }
+    
+    .modal-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 1.5rem;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    
+    .modal-header h2 {
+        margin: 0;
+        color: var(--text-primary);
+    }
+    
+    .close-btn {
+        background: none;
+        border: none;
+        color: var(--text-secondary);
+        cursor: pointer;
+        padding: 0.5rem;
+        border-radius: 50%;
+        transition: all 0.2s ease;
+    }
+    
+    .close-btn:hover {
+        background: rgba(255, 255, 255, 0.1);
+        color: var(--text-primary);
+    }
+    
+    .modal-body {
+        padding: 1.5rem;
+    }
+    
+    .modal-body p {
+        margin-bottom: 1.5rem;
+        color: var(--text-secondary);
+    }
+    
+    .streaming-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+        gap: 1rem;
+        margin-bottom: 2rem;
+    }
+    
+    .streaming-btn {
+        background: rgba(255, 255, 255, 0.05);
+        border: 2px solid transparent;
+        border-radius: 10px;
+        padding: 1rem;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 0.5rem;
+        text-align: center;
+        position: relative;
+    }
+    
+    .streaming-btn:hover {
+        border-color: var(--platform-color);
+        background: rgba(255, 255, 255, 0.1);
+        transform: translateY(-2px);
+    }
+    
+    .streaming-btn.youtube-special {
+        background: linear-gradient(135deg, rgba(255, 0, 0, 0.1), rgba(255, 0, 0, 0.05));
+    }
+    
+    .streaming-btn.youtube-special:hover {
+        background: linear-gradient(135deg, rgba(255, 0, 0, 0.2), rgba(255, 0, 0, 0.1));
+        box-shadow: 0 4px 15px rgba(255, 0, 0, 0.2);
+    }
+    
+    .platform-icon {
+        font-size: 2rem;
+    }
+    
+    .platform-name {
+        color: var(--text-primary);
+        font-weight: 500;
+    }
+    
+    .platform-desc {
+        color: var(--text-secondary);
+        font-size: 0.75rem;
+        opacity: 0.8;
+    }
+    
+    .modal-footer {
+        border-top: 1px solid rgba(255, 255, 255, 0.1);
+        padding: 1rem 1.5rem;
+        display: flex;
+        justify-content: center;
+    }
+    
     @media (max-width: 768px) {
         .movie-detail {
             grid-template-columns: 1fr;
@@ -271,6 +599,19 @@
         
         .cast-grid {
             grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+        }
+        
+        .action-buttons {
+            flex-direction: column;
+        }
+        
+        .streaming-grid {
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+        }
+        
+        .modal-content {
+            width: 95%;
+            margin: 1rem;
         }
     }
 </style>
