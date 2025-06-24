@@ -40,6 +40,7 @@
             |-- tmdb.js
         |-- components
             |-- MovieCard.svelte
+            |-- SearchBar.svelte
         |-- index.js
     |-- routes
         |-- +layout.svelte
