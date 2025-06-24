@@ -4,8 +4,11 @@
 
 	// Fetch trending movies from TMDB API
 	let trendingMovies = [];
-	let isLoading = true;
-	let error = null;
+	let popularTvShows = [];
+	let isLoadingMovies = true;
+	let isLoadingTvShows = true;
+	let movieError = null;
+	let tvError = null;
 
 	const fetchTrendingMovies = async () => {
 		try {
@@ -18,15 +21,36 @@
 			const data = await response.json();
 			trendingMovies = data.results.slice(0, 8);
 		} catch (err) {
-			error = err.message;
+			movieError = err.message;
 			console.error('Error fetching movies:', err);
 		} finally {
-			isLoading = false;
+			isLoadingMovies = false;
+		}
+	};
+
+	const fetchPopularTvShows = async () => {
+		try {
+			const response = await fetch(
+				`https://api.themoviedb.org/3/tv/popular?api_key=${import.meta.env.VITE_TMDB_API_KEY}`
+			);
+			if (!response.ok) {
+				throw new Error('Failed to fetch popular TV shows');
+			}
+			const data = await response.json();
+			popularTvShows = data.results.slice(0, 8);
+		} catch (err) {
+			tvError = err.message;
+			console.error('Error fetching TV shows:', err);
+		} finally {
+			isLoadingTvShows = false;
 		}
 	};
 
 	// Fetch on component mount
-	onMount(fetchTrendingMovies);
+	onMount(() => {
+		fetchTrendingMovies();
+		fetchPopularTvShows();
+	});
 </script>
 
 <div class="container">
@@ -48,47 +72,63 @@
 		</div>
 	</section>
 
-	<!-- Loading State -->
-	{#if isLoading}
-		<div class="loading">
-			<div class="spinner"></div>
+	<!-- Trending Movies Section -->
+	<section>
+		<div class="section-header">
+			<h2 class="section-title">🔥 Trending Movies</h2>
+			<a href="/movies/trending" class="view-all">View All</a>
 		</div>
-	<!-- Error State -->
-	{:else if error}
-		<div class="error-message">
-			<p>Error loading movies: {error}</p>
-			<button on:click={fetchTrendingMovies} class="btn btn-primary">
-				Retry
-			</button>
-		</div>
-	<!-- Content -->
-	{:else}
-		<!-- Trending Movies Section -->
-		<section>
-			<div class="section-header">
-				<h2 class="section-title">🔥 Trending Movies</h2>
-				<a href="/movies/trending" class="view-all">View All</a>
+		
+		<!-- Loading State for Movies -->
+		{#if isLoadingMovies}
+			<div class="loading">
+				<div class="spinner"></div>
 			</div>
+		<!-- Error State for Movies -->
+		{:else if movieError}
+			<div class="error-message">
+				<p>Error loading movies: {movieError}</p>
+				<button on:click={fetchTrendingMovies} class="btn btn-primary">
+					Retry
+				</button>
+			</div>
+		<!-- Movies Content -->
+		{:else}
 			<div class="movie-grid">
 				{#each trendingMovies as movie}
 					<MovieCard {movie} />
 				{/each}
 			</div>
-		</section>
+		{/if}
+	</section>
 
-		<!-- Popular TV Shows Section -->
-		<section>
-			<div class="section-header">
-				<h2 class="section-title">📺 Popular TV Shows</h2>
-				<a href="/tv/popular" class="view-all">View All</a>
+	<!-- Popular TV Shows Section -->
+	<section>
+		<div class="section-header">
+			<h2 class="section-title">📺 Popular TV Shows</h2>
+			<a href="/tv/popular" class="view-all">View All</a>
+		</div>
+		
+		<!-- Loading State for TV Shows -->
+		{#if isLoadingTvShows}
+			<div class="loading">
+				<div class="spinner"></div>
 			</div>
-			<!-- TV shows would go here -->
+		<!-- Error State for TV Shows -->
+		{:else if tvError}
+			<div class="error-message">
+				<p>Error loading TV shows: {tvError}</p>
+				<button on:click={fetchPopularTvShows} class="btn btn-primary">
+					Retry
+				</button>
+			</div>
+		<!-- TV Shows Content -->
+		{:else}
 			<div class="movie-grid">
-				<!-- Placeholder for TV shows -->
-				<div class="placeholder-text">
-					TV shows will be displayed here
-				</div>
+				{#each popularTvShows as tvShow}
+					<MovieCard movie={tvShow} />
+				{/each}
 			</div>
-		</section>
-	{/if}
+		{/if}
+	</section>
 </div>
