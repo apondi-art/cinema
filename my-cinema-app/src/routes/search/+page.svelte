@@ -171,7 +171,7 @@
             <section>
                 <div class="section-header">
                     <h2 class="section-title">🔥 Trending Movies</h2>
-                    <a href="/trending/movies" class="view-all">View All</a>
+                    <a href="/movie/trending" class="view-all">View All</a>
                 </div>
                 <div class="movie-grid">
                     {#each trendingMovies as movie}
@@ -187,7 +187,7 @@
             <section>
                 <div class="section-header">
                     <h2 class="section-title">📺 Trending TV Shows</h2>
-                    <a href="/trending/tv" class="view-all">View All</a>
+                    <a href="/tv/popular" class="view-all">View All</a>
                 </div>
                 <div class="movie-grid">
                     {#each trendingTV as show}
