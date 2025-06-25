@@ -246,11 +246,17 @@
 </div>
 
 <!-- Watch Modal -->
+
 {#if showWatchModal}
+    <!-- svelte-ignore a11y-click-events-have-key-events -->
+    <!-- svelte-ignore a11y-no-static-element-interactions -->
     <div class="modal-overlay" on:click={closeWatchModal}>
+        <!-- svelte-ignore a11y-click-events-have-key-events -->
+        <!-- svelte-ignore a11y-no-static-element-interactions -->
         <div class="modal-content" on:click|stopPropagation>
             <div class="modal-header">
                 <h2>Watch "{media.title || media.name}"</h2>
+                <!-- svelte-ignore a11y-consider-explicit-label -->
                 <button class="close-btn" on:click={closeWatchModal}>
                     <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                         <line x1="18" y1="6" x2="6" y2="18"/>
